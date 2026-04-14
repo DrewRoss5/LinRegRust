@@ -31,10 +31,10 @@ fn main() {
             unimplemented!();
         }
         "help" => {
-            unimplemented!();
+            print_help();
         }
         _ => {
-            eprintln!("Error: Unrecognized command. See https://github.com/DrewRoss5/LinRegRust for more information.")
+            eprintln!("Error: Unrecognized command. See https://github.com/DrewRoss5/LinRegRust for more information.");
         }
     }
 

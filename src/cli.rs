@@ -54,3 +54,19 @@ pub fn manual_interface(model_file: &str) {
         buf.clear();
     }
 }
+
+pub fn print_help() {
+    let commands = vec!["\nCOMMAND:", "train", "manual", "auto", "help"];
+    let args = vec!["ARGUMENTS:", "<train_file> <out_file> [fit-intercept]", "<model_file>", "<model_file> <data_file> <out_file>", ""];
+    let descriptions = vec![
+        "DESCRIPTION:",
+        "Trains a model on train_file and stores it to out_file.",
+        "Opens an interface to manually generate predictions with the model in model_file.",
+        "Creates a prediction for each number in data_file, and stores them to out_file",
+        "Displays this message.\n"
+    ];
+    for i in 0..5 {
+        println!("{:<14}{:<45}{}", commands[i], args[i], descriptions[i])
+    }
+    println!("See https://github.com/DrewRoss5/LinRegRust for more information.\n")
+}
