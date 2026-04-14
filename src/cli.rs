@@ -1,5 +1,5 @@
-use crate::regression::Regression;
-use std::io::{Write, stdout, stdin};
+use crate::regression::{DataPoint, Regression};
+use std::{fs::File, io::{BufRead, BufReader, Write, stdin, stdout}};
 
 pub fn print_err(msg: &str) {
     eprintln!("\x1b[1m\x1b[31mError:\x1b[0m {} See https://github.com/DrewRoss5/LinRegRust for more information.", msg);
@@ -53,6 +53,59 @@ pub fn manual_interface(model_file: &str) {
         }
         buf.clear();
     }
+}
+
+pub fn auto_predict(model_file: &str, data_file: &str, out_file: &str) {
+    let mut out: Vec<DataPoint> = Vec::new();
+    let model: Regression;
+    // import our model
+    match Regression::import_model(model_file) {
+        Ok(reg) => {model = reg;}
+        Err(e) => {
+            print_err(e.to_string().as_str());
+            return;
+        }
+    }
+    // read the input data
+    let in_file: File;
+    match File::open(data_file) {
+        Ok(file) => {in_file = file;}
+        Err(_) => {
+            print_err("Failed to read input data file. Does it exist?");
+            return;
+        }
+    }
+    // generate our predictions
+    print!("Predicting...");
+    stdout().flush().expect("failed to flush stdout");
+    let reader = BufReader::new(in_file);
+    for line in reader.lines() {
+        let x_str = line.expect("Failed to read line");
+        match x_str.parse::<f64>() {
+            Ok(x) => out.push(DataPoint { x, y: model.predict(x) }),
+            Err(_) => {
+                println!(""); // put a newline
+                print_err("Invalid input data file.");
+                return;
+            }
+        }
+    }
+    println!("OK");
+    // write the line
+    print!("Storing results...");
+    stdout().flush().expect("failed to flush stdout");
+    match csv::Writer::from_path(out_file) {
+        Ok(mut wrt) => {
+            for pred in out {
+                wrt.serialize(pred).unwrap();
+            }
+        }
+        Err(_) => {
+            print_err("Failed to save data.");
+            return;
+        }
+    }
+    println!("OK.")
 }
 
 pub fn print_help() {
