@@ -71,7 +71,7 @@ impl Regression {
 
     // calculates the y-intercept given the averages and slope of a dataset
     fn calc_intercept(avg: &DataPoint, slope: f64) -> f64 {
-        avg.y - (avg.x / slope)
+        avg.y - (avg.x*slope)
     }
 
     // trains the model from a file, this overwrites any current parameters
