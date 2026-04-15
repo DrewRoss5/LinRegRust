@@ -1,5 +1,6 @@
 mod regression;
 mod cli;
+mod test;
 
 use crate::cli::*;
 
