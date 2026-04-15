@@ -1,5 +1,5 @@
-use crate::regression::{DataPoint, Regression};
-use std::{fs::File, io::{BufRead, BufReader, Write, stdin, stdout}};
+use crate::{regression::{self, DataPoint, Regression}, test::*};
+use std::{fs::File, io::{BufRead, BufReader, Write, stdin, stdout}, sync::Arc, thread};
 
 pub fn print_err(msg: &str) {
     eprintln!("\x1b[1m\x1b[31mError:\x1b[0m {} See https://github.com/DrewRoss5/LinRegRust for more information.", msg);
@@ -106,6 +106,42 @@ pub fn auto_predict(model_file: &str, data_file: &str, out_file: &str) {
         }
     }
     println!("OK.")
+}
+
+pub fn test_model(model_file: &str, data_file: &str, multithread: bool) {
+    let model: Arc<Regression>;
+    // import our model
+    match Regression::import_model(model_file) {
+        Ok(reg) => {model = Arc::new(reg);}
+        Err(e) => {
+            print_err(e.to_string().as_str());
+            return;
+        }
+    }
+    // read the input data
+    let dataset: Arc<Vec<DataPoint>>;
+    match regression::import_dat(data_file) {
+        Ok(data) => {dataset = Arc::new(data)}
+        Err(e) => {
+            print_err(e.to_string().as_str());
+            return;
+        }
+    }
+    // run our benchmarks and display the results
+    let ds_ptr1= Arc::clone(&dataset);
+    let model_ptr1 = Arc::clone(&model);
+    let ds_ptr2= Arc::clone(&dataset);
+    let model_ptr2 = Arc::clone(&model);
+    if multithread {
+        let t1 = thread::spawn(move || {println!("Mean Absolute Error: {}", test_mae(model_ptr1, ds_ptr1))});
+        let t2 = thread::spawn(move || {println!("Mean Squared Error: {}",  test_r2(model_ptr2, ds_ptr2))});
+        t1.join().expect("Failed to join thread 1");
+        t2.join().expect("Failed to join thread 2");
+    }
+    else {
+        println!("Mean Absolute Error: {}", test_mae(model_ptr1, ds_ptr2));
+        println!("Mean Squared Error: {}",  test_r2(model_ptr2, ds_ptr1))
+    }
 }
 
 pub fn print_help() {

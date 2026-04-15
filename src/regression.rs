@@ -1,12 +1,12 @@
 use std::{fs::{File, OpenOptions}, io::{Error, ErrorKind}};
 
-#[derive(serde::Deserialize, serde::Serialize)]
+#[derive(serde::Deserialize, serde::Serialize, Clone, Copy)]
 pub struct DataPoint {
     pub x: f64,
     pub y: f64
 }
 
-#[derive(serde::Deserialize, serde::Serialize)]
+#[derive(serde::Deserialize, serde::Serialize, Clone, Copy)]
 pub struct Regression {
     slope: f64,
     intercept: f64,
